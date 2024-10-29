@@ -1,0 +1,146 @@
+#BASIC CONSOLE IMPLEMENTATION
+
+
+
+import random
+
+class HangmanGame:
+    def __init__(self):
+        self.word_list = ["python", "hangman", "challenge", "programming", "development"]
+        self.word = random.choice(self.word_list)
+        self.guessed_letters = []
+        self.max_attempts = 6
+        self.incorrect_attempts = 0
+
+    def display_game_state(self):
+        display_word = ''.join([letter if letter in self.guessed_letters else '_' for letter in self.word])
+        print(f"Current word: {display_word}")
+        print(f"Incorrect guesses remaining: {self.max_attempts - self.incorrect_attempts}")
+        print(f"Guessed letters: {', '.join(self.guessed_letters)}")
+
+    def guess_letter(self, letter):
+        if letter in self.guessed_letters:
+            print("You've already guessed that letter.")
+            return False
+
+        self.guessed_letters.append(letter)
+        if letter not in self.word:
+            self.incorrect_attempts += 1
+            return False
+        return True
+
+    def is_game_over(self):
+        return self.incorrect_attempts >= self.max_attempts or all(letter in self.guessed_letters for letter in self.word)
+
+    def is_won(self):
+        return all(letter in self.guessed_letters for letter in self.word)
+
+def main():
+    game = HangmanGame()
+    print("Welcome to Hangman Challenge!")
+    
+    while not game.is_game_over():
+        game.display_game_state()
+        guess = input("Guess a letter: ").lower()
+
+        if len(guess) != 1 or not guess.isalpha():
+            print("Please enter a single valid letter.")
+            continue
+
+        if not game.guess_letter(guess):
+            print("Incorrect guess!")
+
+    game.display_game_state()
+
+    if game.is_won():
+        print("Congratulations! You've guessed the word!")
+    else:
+        print(f"Game over! The word was: '{game.word}'")
+
+if __name__ == "__main__":
+    main()
+
+#OPTIONAL GUI IMPLEMENTATION
+
+import random
+import tkinter as tk
+from tkinter import messagebox
+
+class HangmanGame:
+    def __init__(self):
+        self.word_list = ["python", "hangman", "challenge", "programming", "development"]
+        self.word = random.choice(self.word_list)
+        self.guessed_letters = []
+        self.max_attempts = 6
+        self.incorrect_attempts = 0
+
+    def display_word(self):
+        return ''.join([letter if letter in self.guessed_letters else '_' for letter in self.word])
+
+    def guess_letter(self, letter):
+        if letter in self.guessed_letters:
+            return False  # Already guessed
+        self.guessed_letters.append(letter)
+        if letter not in self.word:
+            self.incorrect_attempts += 1
+            return False
+        return True
+
+    def is_game_over(self):
+        return self.incorrect_attempts >= self.max_attempts or all(letter in self.guessed_letters for letter in self.word)
+
+    def is_won(self):
+        return all(letter in self.guessed_letters for letter in self.word)
+
+class HangmanApp:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Hangman Challenge")
+        self.game = HangmanGame()
+
+        self.word_label = tk.Label(master, text=self.game.display_word())
+        self.word_label.pack(pady=10)
+
+        self.guess_entry = tk.Entry(master)
+        self.guess_entry.pack(pady=5)
+
+        self.guess_button = tk.Button(master, text="Guess", command=self.make_guess)
+        self.guess_button.pack(pady=5)
+
+        self.incorrect_label = tk.Label(master, text=f"Incorrect guesses remaining: {self.game.max_attempts - self.game.incorrect_attempts}")
+        self.incorrect_label.pack(pady=10)
+
+    def make_guess(self):
+        guess = self.guess_entry.get().lower()
+        self.guess_entry.delete(0, tk.END)
+
+        if len(guess) != 1 or not guess.isalpha():
+            messagebox.showerror("Invalid input", "Please enter a single valid letter.")
+            return
+
+        if not self.game.guess_letter(guess):
+            messagebox.showinfo("Guess Result", "Incorrect guess!")
+            self.update_incorrect_guesses()
+
+        self.update_word_display()
+
+        if self.game.is_game_over():
+            self.end_game()
+
+    def update_word_display(self):
+        self.word_label.config(text=self.game.display_word())
+
+    def update_incorrect_guesses(self):
+        self.incorrect_label.config(text=f"Incorrect guesses remaining: {self.game.max_attempts - self.game.incorrect_attempts}")
+
+    def end_game(self):
+        if self.game.is_won():
+            messagebox.showinfo("Game Over", "Congratulations! You've guessed the word!")
+        else:
+            messagebox.showinfo("Game Over", f"Game over! The word was: '{self.game.word}'")
+        self.master.quit()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = HangmanApp(root)
+    root.mainloop()
